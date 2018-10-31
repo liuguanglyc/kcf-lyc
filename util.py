@@ -21,7 +21,16 @@ def load_bbox(ground_file,resize,dataformat=0):
     return bbox
 
 def load_imglst(img_dir):
-    file_lst = [pic for pic in os.listdir(img_dir) if '.jpg' in pic]
+    #file_lst = [pic for pic in os.listdir(img_dir) if '.jpg' in pic]
+    file_lst = []
+    pics = os.listdir(img_dir)
+    pics.sort()
+    for pic in pics:
+        if '.jpg' in pic:
+            file_lst.append(pic)
+
+
+
     img_lst = [os.path.join(img_dir,filename) for filename in file_lst]
     return img_lst 
 

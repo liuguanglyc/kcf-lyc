@@ -38,12 +38,13 @@ def cor_fft(x1,x2,sigma):
     cor = np.real(cor)
     return cor
 
-def train(x,y,sigma,l):
+def train(x,y,sigma,l):#计算alpha的值 k为高斯核函数
     k = cor_fft(x,x,sigma)
+
     alpha = fft(y)/(fft(k)+l)
     return alpha
 
-def detect(alpha,x,z,sigma):
+def detect(alpha,x,z,sigma):#从第二帧开始就算响应，f(z)=F(-1)(alpha*fft(k))
     k = cor_fft(z,x,sigma)
     response = np.real(np.fft.ifft2(alpha*fft(k)))
     return response
@@ -62,10 +63,10 @@ def update_tracker(response,img_size,pos,HOG_flag,scale_factor=1):
         px_new = np.int(px_new) 
         py_new = np.int(py_new)
     else:
-        move[0] = np.floor(res_pos[0]/32.0*(2*ww))
-        move[1] = np.floor(res_pos[1]/32.0*(2*wh))
-        px_new = [px+move[0],px-(2*ww-move[0])][move[0]>ww] 
-        py_new = [py+move[1],py-(2*wh-move[1])][move[1]>wh] 
+        move[0] = np.floor(res_pos[0]/64.0*(2*ww))
+        move[1] = np.floor(res_pos[1]/64.0*(2*wh))
+        px_new = [px+move[0],px-(2*ww-move[0])][move[0]>ww]
+        py_new = [py+move[1],py-(2*wh-move[1])][move[1]>wh]
     if px_new<0: px_new = 0
     if px_new>w: px_new = w-1
     if py_new<0: py_new = 0
@@ -82,6 +83,7 @@ def get_window(img, bbox, padding, scale_factor=1 ,rez_shape=None):
     center_y = np.int(y+np.floor(h/2.0))
     w = np.floor(1.0*w*scale_factor)
     h = np.floor(1.0*h*scale_factor)
+
     x_min,x_max = center_x-np.int(w*padding/2.0),center_x+np.int(w*padding/2.0)
     y_min,y_max = center_y-np.int(h*padding/2.0),center_y+np.int(h*padding/2.0)
     if (x_max-x_min)%2!=0:
@@ -106,7 +108,7 @@ def get_window(img, bbox, padding, scale_factor=1 ,rez_shape=None):
             return img_crop
     else:
         if len(img_crop.shape)==3:
-            img_crop = np.pad(img_crop,((lx,rx),(ly,ry),(0,0)),'edge')
+            img_crop = np.pad(img_crop,((lx,rx),(ly,ry),(0,0)),'edge')#边缘数组填充
         else:
             img_crop = np.pad(img_crop,((lx,rx),(ly,ry)),'edge')
         if rez_shape is not None:
@@ -124,9 +126,9 @@ def process_cos(img,cos_window):
     return img*cos_window_out
 
 
-def prewhiten(x):
+def prewhiten(x):#正规化方法
     mean = np.mean(x)
-    std = np.std(x)
+    std = np.std(x)#标准差
     std_adj = np.maximum(std, 1.0/np.sqrt(x.size))
     y = np.multiply(np.subtract(x, mean), 1/std_adj)
     return y  

@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from numpy.linalg import norm
 
-def hog(img, bin_n=8, cell_size=4):
+def hog(img, bin_n=8, cell_size=2):
     img = cv2.resize(img,(128,128))
     gx = cv2.Sobel(img, cv2.CV_32F, 1, 0)
     gy = cv2.Sobel(img, cv2.CV_32F, 0, 1)
@@ -14,8 +14,8 @@ def hog(img, bin_n=8, cell_size=4):
 
     cellx = celly = cell_size
 
-    for i in range(0,img.shape[0]/celly):
-        for j in range(0,img.shape[1]/cellx):
+    for i in range(0,int(img.shape[0]/celly)):
+        for j in range(0,int(img.shape[1]/cellx)):
             bin_cells.append(bin[i*celly : i*celly+celly, j*cellx : j*cellx+cellx])
             mag_cells.append(mag[i*celly : i*celly+celly, j*cellx : j*cellx+cellx])   
 
@@ -27,7 +27,7 @@ def hog(img, bin_n=8, cell_size=4):
     hist /= hist.sum() + eps
     hist = np.sqrt(hist)
     hist /= norm(hist) + eps
-    hist_out = np.reshape(hist,(32,32,8))
+    hist_out = np.reshape(hist,(64,64,8))
 
 
     return hist_out
